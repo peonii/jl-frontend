@@ -119,7 +119,7 @@ export const SideQuestDisplay = () => {
         <View style={{ marginTop: 20 }}>
             <Text style={{ fontFamily: 'Lexend', textAlign: 'center', marginHorizontal: 20 }}>
                 Aktualne zadanie poboczne:{'\n'}
-                <Text style={{ fontFamily: 'LexendBold', fontSize: 13 }}>
+                <Text style={{ fontFamily: 'LexendBold', fontSize: 17 }}>
                     {sideQuest ? sideQuest.content : 'brak'} {sideQuest ? '($' + sideQuest.reward + ')' : ''}{isDouble ? ' (x2)' : ''}
                 </Text>
             </Text>

@@ -4,6 +4,7 @@ import { Alert, Text, TouchableOpacity, View } from "react-native"
 import { MoneyContext } from "../../shared/MoneyContext"
 import { TransitMoney } from "./TransitMoney"
 import { TransitSelector } from "./TransitSelector"
+import config from "../../config"
 
 export const TransitMenu = () => {
     const [current, setCurrent] = useState<number>(1)
@@ -33,15 +34,26 @@ export const TransitMenu = () => {
     async function handleBuying() {
         const calculatedMoney = CONSTANTS[current] * count
 
-        if (calculatedMoney > money) {
-            return Alert.alert('Nie masz pieniędzy!', 'Nie masz wystarczającej liczby monet aby kupić tyle biletów!')
-        }
+        const password = await AsyncStorage.getItem('@jl_password');
 
-        await AsyncStorage.setItem('@jl_money', `${money - calculatedMoney}`)
-        setMoney(money - calculatedMoney)
-        setCurrent(0)
-        setCount(0)
-        return Alert.alert('Kupiono bilety', `Kupiono ${count} biletów na ${NAMES[current]}!`)
+        const balanceRequest = await fetch(config.apiURL + '/team/balance', {
+            method: "POST",
+            headers: {
+                Authorization: password,
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                "subtract": calculatedMoney
+            })
+        });
+
+        if (balanceRequest.ok) {
+            setCurrent(0)
+            setCount(0)
+            return Alert.alert('Kupiono bilety', `Kupiono ${count} biletów na ${NAMES[current]}!`)
+        } else {
+            return Alert.alert('Błąd', `Bilety są za drogie!`)
+        }
     }
 
     function getTimeTillVeto() {
@@ -50,12 +62,21 @@ export const TransitMenu = () => {
 
     useEffect(() => {
         async function fetchData() {
-            const vetoPeriod = await AsyncStorage.getItem('@jl_vetoPeriod')
-            const vetoPeriodDate = new Date(vetoPeriod)
+            const password = await AsyncStorage.getItem('@jl_password');
 
-            if (vetoPeriodDate.getTime() > new Date().getTime()) {
+            const vetoPeriodRequest = await fetch(config.apiURL + '/quests/veto', {
+                headers: {
+                    Authorization: password
+                }
+            });
+
+            const vetoPeriod = await vetoPeriodRequest.json();
+
+            if (vetoPeriod.status) {
                 setAfterVeto(true)
-                setToVeto(vetoPeriodDate)
+                setToVeto(new Date(vetoPeriod.veto))
+            } else {
+                setAfterVeto(false)
             }
         }
 

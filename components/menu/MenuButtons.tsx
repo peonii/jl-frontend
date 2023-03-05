@@ -6,37 +6,11 @@ import { QuestsButton } from "../buttons/QuestsButton"
 import { TransitButton } from "../buttons/TransitButton"
 
 export const MenuButtons = ({ navigation }) => {
-    async function resetData() {
-        Alert.alert(
-            'UWAGA',
-            'Ten przycisk wyczyści wszystkie twoje dane związane z aplikacją! Nie potwierdzaj tego podczas gry! Czy na pewno chcesz wyczyścić dane?',
-            [
-                {
-                    'style': 'cancel',
-                    'text': 'Nie'
-                },
-                {
-                    'style': 'destructive',
-                    'text': 'Tak',
-                    async onPress() {
-                        await AsyncStorage.multiRemove(["@jl_money", "@jl_quests", "@jl_sideQuest", "@jl_prevSideQuest", "@jl_double", "@jl_vetoPeriod"])
-
-                        announceEvent('PUREQ ZRESETOWAŁ SWOJA APLIKACJE')
-                        Alert.alert('Uwaga', 'Zrestartuj aplikację, aby zmiany poprawnie zaszły')
-                    }
-                }
-            ]
-        )
-    }
-
     return (
-        <Text style={{ textAlign: 'center', width: 40}}>
-            <PowerupButton navigation={navigation} />{'\n'}
-            <TransitButton navigation={navigation} />{'\n'}
+        <Text style={{ textAlign: 'center', width: 40, flexDirection: 'column' }}>
+            <PowerupButton navigation={navigation} />{'\n\n'}
+            <TransitButton navigation={navigation} />{'\n\n'}
             <QuestsButton navigation={navigation} />{'\n\n'}
-            <TouchableOpacity onPress={resetData} style={{ borderRadius: 10, borderWidth: 2, borderColor: '#ff7777', padding: 10, marginTop: 50 }}>
-                <Text style={{ color: '#ff7777', fontFamily: 'LexendBold' }}>Reset</Text>
-            </TouchableOpacity>
         </Text>
     )
 }

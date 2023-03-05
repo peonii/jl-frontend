@@ -5,14 +5,15 @@ import { announceEvent } from "../../shared/announceEvent"
 import { MoneyContext } from "../../shared/MoneyContext"
 import { QuestContext } from "../../shared/QuestContext"
 import { Quest, QuestDifficulty } from "../../shared/types"
+import { useQuery } from 'react-query';
+import { getPassword } from "../../shared/getPassword"
+import config from "../../config"
 
 interface Props {
     quest: Quest
 }
 
 export const QuestDisplay = (props: Props) => {
-    const questContext = useContext(QuestContext)
-    const moneyContext = useContext(MoneyContext)
 
     async function handleCompletion() {
         Alert.alert('Potwierdź', `Na pewno chcesz ukończyć zadanie "${props.quest.content}"?`, [
@@ -23,22 +24,14 @@ export const QuestDisplay = (props: Props) => {
             {
                 "style": "default",
                 async onPress() {
-                    if (props.quest.difficulty == QuestDifficulty.EASY) {
-                        await AsyncStorage.setItem('@jl_money', `${moneyContext.money + 150}`)
-                        moneyContext.setMoney(moneyContext.money + 150)
-                    } else if (props.quest.difficulty == QuestDifficulty.MEDIUM) {
-                        await AsyncStorage.setItem('@jl_money', `${moneyContext.money + 300}`)
-                        moneyContext.setMoney(moneyContext.money + 300)
-                    } else if (props.quest.difficulty == QuestDifficulty.HARD) {
-                        await AsyncStorage.setItem('@jl_money', `${moneyContext.money + 500}`)
-                        moneyContext.setMoney(moneyContext.money + 500)
-                    }
+                    const password = await AsyncStorage.getItem('@jl_password');
 
-                    const newQuests = questContext.quests.filter((q) => q.id != props.quest.id)
-                    await AsyncStorage.setItem('@jl_quests', JSON.stringify(newQuests))
-
-                    announceEvent('Ukończono zadanie: ' + props.quest.content)
-                    questContext.setQuests(newQuests)
+                    await fetch(config.apiURL + '/quests/complete/' + props.quest.id, {
+                        method: 'POST',
+                        headers: {
+                            Authorization: password
+                        }
+                    })
                 },
                 "text": "Tak"
             }
@@ -47,9 +40,9 @@ export const QuestDisplay = (props: Props) => {
 
     return (
         <View style={{ margin: 10, width: 300 }}>
-            <Text style={{ fontFamily: 'Lexend', fontSize: 13 }}>{props.quest.content}</Text>
+            <Text style={{ fontFamily: 'Lexend', fontSize: 20, color: props.quest.complete ? '#aaaaaa' : '#000000' }}>{props.quest.content}</Text>
             <TouchableOpacity onPress={handleCompletion}>
-                <Text style={{ fontFamily: 'LexendBold', borderTopWidth: 2, borderColor: "#eeeeee", marginTop: 4, paddingTop: 4 }}>Ukończ</Text>
+                <Text style={{ fontFamily: 'LexendBold', borderTopWidth: 2, fontSize: 20, borderColor: "#eeeeee", marginTop: 4, paddingTop: 4 }}>Ukończ</Text>
             </TouchableOpacity>
         </View>
     )

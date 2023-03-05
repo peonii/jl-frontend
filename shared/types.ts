@@ -7,8 +7,8 @@ export enum QuestDifficulty {
 
 export interface Quest {
     content: string,
-    difficulty: QuestDifficulty,
     id: number
+    complete: boolean
 }
 
 export interface SideQuest {
